@@ -15,6 +15,8 @@ class S3Notifier {
     this.key = options.key;
     this.pollTime = options.poll || DEFAULT_POLL_TIME;
 
+    this.s3 = options.s3 || s3;
+
     this.params = {
       Bucket: this.bucket,
       Key: this.key
@@ -29,12 +31,13 @@ class S3Notifier {
   }
 
   getCurrentLastModified() {
-    return s3.headObject(this.params).promise()
+    return this.s3.headObject(this.params).promise()
       .then(data => {
         this.lastModified = data.LastModified;
       })
-      .catch(() => {
+      .catch((error) => {
         this.ui.writeError('error fetching S3 last modified; notifications disabled');
+        this.ui.writeError(error);
       });
   }
 
@@ -45,7 +48,7 @@ class S3Notifier {
   }
 
   poll() {
-    s3.headObject(this.params).promise()
+    this.s3.headObject(this.params).promise()
       .then(data => {
         this.compareLastModifieds(data.LastModified);
         this.schedulePoll();
