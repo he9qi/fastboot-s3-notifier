@@ -4,10 +4,6 @@ const AWS  = require('aws-sdk');
 
 const DEFAULT_POLL_TIME = 3 * 1000;
 
-const s3 = new AWS.S3({
-  apiVersion: '2006-03-01'
-});
-
 class S3Notifier {
   constructor(options) {
     this.ui = options.ui;
@@ -21,6 +17,12 @@ class S3Notifier {
       Bucket: this.bucket,
       Key: this.key
     };
+
+    this.s3 = new AWS.S3({
+      apiVersion: '2006-03-01',
+      signatureVersion: 'v4',
+      region: options.region
+    });
   }
 
   subscribe(notify) {
@@ -56,7 +58,7 @@ class S3Notifier {
   }
 
   compareLastModifieds(newLastModified) {
-    if (newLastModified !== this.lastModified) {
+    if (newLastModified.getTime() !== this.lastModified.getTime()) {
       this.ui.writeLine('config modified; old=%s; new=%s', this.lastModified, newLastModified);
       this.lastModified = newLastModified;
       this.notify();
