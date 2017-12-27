@@ -11,14 +11,12 @@ class S3Notifier {
     this.key = options.key;
     this.pollTime = options.poll || DEFAULT_POLL_TIME;
 
-    this.s3 = options.s3 || s3;
-
     this.params = {
       Bucket: this.bucket,
       Key: this.key
     };
-
-    this.s3 = new AWS.S3({
+    
+    this.s3 = options.s3 || new AWS.S3({
       apiVersion: '2006-03-01',
       signatureVersion: 'v4',
       region: options.region
